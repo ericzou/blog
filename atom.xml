@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Just A Startup Guy]]></title>
+  <link href="http://ericzou.github.io/blog/atom.xml" rel="self"/>
+  <link href="http://ericzou.github.io/blog/"/>
+  <updated>2013-05-18T21:37:50-07:00</updated>
+  <id>http://ericzou.github.io/blog/</id>
+  <author>
+    <name><![CDATA[Eric Zou]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using AngularJS for existing Rails app]]></title>
+    <link href="http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app/"/>
+    <updated>2013-05-03T21:05:00-07:00</updated>
+    <id>http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app</id>
+    <content type="html"><![CDATA[<p>In one of my projects, we were tasked to put AngularJS on top of an existing Rails app.  We wanted to keep the business impact at a minimum.  This means that we had to gradually make the transition while adding more end-user features.</p>
+
+<p>Since retro fitting a client side framework is pretty common for many Rails apps, I&#8217;m going to share some of the problems I&#8217;ve encoutered, and possible approaches I used.</p>
+
+<h2>HAML or HTML?</h2>
+
+<p>Our views were written in haml and generated from the server side. I liked it and would like to continue using it for generating view markup. Unfortunatelly, we didn&#8217;t find a javascript library that work <em>exact</em> the same as ruby&#8217;s haml.</p>
+
+<p>We ended up created a <code>TemplatesController</code> and route all of the template fetching requests though this <code>TemplatesController</code>. From browser&#8217;s perspective, we are still serving static HTML, but we were able to write it in HAML from the server side.</p>
+
+<p>We’d like to use Angular templates but this meant we needed to rewrite a large chunk of views in static html and lose access to our layout system, view utility helpers and i18n translations.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># TemplatesController</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">TemplatesController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:path</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">file</span><span class="p">:</span> <span class="s2">&quot;/views/templates/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">handler</span><span class="p">:</span> <span class="o">[</span><span class="ss">:haml</span><span class="o">]</span><span class="p">,</span> <span class="ss">layout</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># router.rb</span>
+</span><span class='line'><span class="c1"># routes template/* to a template controller</span>
+</span><span class='line'><span class="n">match</span> <span class="s1">&#39;/template/*path&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;templates#show&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>One added benefit was that because we are still on the server side, we have access to things like <code>User::ROLES</code> and <code>I18n.t 'store.title'</code>, which we otherwise have to duplicate at the client side.</p>
+
+<h2>Do we have to write validations twice?</h2>
+
+<p>I really like the ActiveRecord error messages. It has good defaults, easily configurable, and intergate well with i18n. At the same time, I want the good user experience that’s provided by the client-side validation. Refreshing the page to see errors is so 2008.</p>
+
+<p>I also don&#8217;t want to write our validations and messages twice. The server side already has validations, we just need to pipe the error messages out to the page via ajax. Its easy with AngualrJS</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&#39;/users&#39;</span><span class="err">,</span> <span class="na">methpd=</span><span class="s">&#39;post&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;fieldset&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;text&#39;</span> <span class="na">ng-model=</span><span class="s">&#39;name&#39;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div&gt;</span>{{errors[&#39;name&#39;]}}<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/fieldset&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;submit&#39;</span> <span class="na">ng-click=</span><span class="s">&#39;submit&#39;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">FooCtrl</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">submit</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">httpRequest</span><span class="p">({},</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">success</span><span class="p">,</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">setErrors</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">$scoppe</span><span class="p">.</span><span class="nx">setErrors</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">scope</span><span class="p">.</span><span class="nx">errors</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">errors</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Every time the user clicks submit without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular&#8217;s two-way binding. The view then gets updated automatically.</p>
+
+<p>Note: The approach works for us becuase our application only validates the input after the user attempts to submit the form. It might not work well in your case.</p>
+
+<h2>Turn functions into services</h2>
+
+<p>We use CanCan for access control. In the view, we show and hide certain elements depending on the current user&#8217;s role. The code snippet below hides the Edit button if <code>current_user</code> does not have the <code>ability</code> to <code>manage</code> <code>Post</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='haml'><span class='line'>  <span class="p">-</span> <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">ability</span><span class="o">.</span><span class="n">can?</span><span class="p">(</span><span class="ss">:manage</span><span class="p">,</span> <span class="no">Post</span><span class="p">)</span>
+</span><span class='line'>    &lt;button&gt;Edit&lt;/button&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We don&#8217;t have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;manage&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;User&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;Post&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>    <span class="err">...</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;User&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;Post&quot;</span><span class="p">:</span> <span class="kc">true</span>
+</span><span class='line'>    <span class="err">...</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;Update&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;User&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;Post&quot;</span><span class="p">:</span> <span class="kc">false</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="err">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the view, we can choose to show/hide elements based on the user&#8217;s role again.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="nt">&lt;button</span> <span class="na">ng-show=</span><span class="s">&quot;canManage(&#39;User&#39;)&quot;</span><span class="nt">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="kd">function</span> <span class="nx">FooCtrl</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">scope</span><span class="p">.</span><span class="nx">canManage</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">scope</span><span class="p">.</span><span class="nx">manage</span><span class="p">[</span><span class="nx">model</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+</feed>

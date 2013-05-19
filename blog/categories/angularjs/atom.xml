@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: AngularJS | Just A Startup Guy]]></title>
+  <link href="http://ericzou.github.io/blog/blog/categories/angularjs/atom.xml" rel="self"/>
+  <link href="http://ericzou.github.io/blog/"/>
+  <updated>2013-05-18T21:37:50-07:00</updated>
+  <id>http://ericzou.github.io/blog/</id>
+  <author>
+    <name><![CDATA[Eric Zou]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using AngularJS for existing Rails app]]></title>
+    <link href="http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app/"/>
+    <updated>2013-05-03T21:05:00-07:00</updated>
+    <id>http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app</id>
+    <content type="html"><![CDATA[<p>In one of my projects, we were tasked to put AngularJS on top of an existing Rails app.  We wanted to keep the business impact at a minimum.  This means that we had to gradually make the transition while adding more end-user features.</p>
+
+<p>Since retro fitting a client side framework is pretty common for many Rails apps, I'm going to share some of the problems I've encoutered, and possible approaches I used.</p>
+
+<h2>HAML or HTML?</h2>
+
+<p>Our views were written in haml and generated from the server side. I liked it and would like to continue using it for generating view markup. Unfortunatelly, we didn't find a javascript library that work <em>exact</em> the same as ruby's haml.</p>
+
+<p>We ended up created a <code>TemplatesController</code> and route all of the template fetching requests though this <code>TemplatesController</code>. From browser's perspective, we are still serving static HTML, but we were able to write it in HAML from the server side.</p>
+
+<p>We’d like to use Angular templates but this meant we needed to rewrite a large chunk of views in static html and lose access to our layout system, view utility helpers and i18n translations.</p>
+
+<p>```ruby</p>
+
+<h1>TemplatesController</h1>
+
+<p>class TemplatesController
+  def show</p>
+
+<pre><code>path = params[:path]
+render file: "/views/templates/#{path}", handler: [:haml], layout: false
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>```ruby</p>
+
+<h1>router.rb</h1>
+
+<h1>routes template/* to a template controller</h1>
+
+<p>match '/template/*path' => 'templates#show'
+```</p>
+
+<p>One added benefit was that because we are still on the server side, we have access to things like <code>User::ROLES</code> and <code>I18n.t 'store.title'</code>, which we otherwise have to duplicate at the client side.</p>
+
+<h2>Do we have to write validations twice?</h2>
+
+<p>I really like the ActiveRecord error messages. It has good defaults, easily configurable, and intergate well with i18n. At the same time, I want the good user experience that’s provided by the client-side validation. Refreshing the page to see errors is so 2008.</p>
+
+<p>I also don't want to write our validations and messages twice. The server side already has validations, we just need to pipe the error messages out to the page via ajax. Its easy with AngualrJS</p>
+
+<p>
+```html
+<form action='/users', methpd='post'>
+  <fieldset></p>
+
+<pre><code>&lt;label&gt;Name&lt;/label&gt;
+&lt;input type='text' ng-model='name' /&gt;
+&lt;div&gt;{{errors['name']}}&lt;/div&gt;
+</code></pre>
+
+<p>  </fieldset>
+  <input type='submit' ng-click='submit' />
+</form>
+```
+</p>
+
+<p>```javascript
+function FooCtrl ($scope) {
+  $scope.submit = function () {</p>
+
+<pre><code>httpRequest({}, scope.success, scope.setErrors)
+</code></pre>
+
+<p>  };</p>
+
+<p>  $scoppe.setErrors = function (response) {</p>
+
+<pre><code>scope.errors = response.data.errors
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>```</p>
+
+<p>Every time the user clicks submit without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular's two-way binding. The view then gets updated automatically.</p>
+
+<p>Note: The approach works for us becuase our application only validates the input after the user attempts to submit the form. It might not work well in your case.</p>
+
+<h2>Turn functions into services</h2>
+
+<p>We use CanCan for access control. In the view, we show and hide certain elements depending on the current user's role. The code snippet below hides the Edit button if <code>current_user</code> does not have the <code>ability</code> to <code>manage</code> <code>Post</code>.</p>
+
+<p>```haml
+  - if current_user.ability.can?(:manage, Post)</p>
+
+<pre><code>&lt;button&gt;Edit&lt;/button&gt;
+</code></pre>
+
+<p>```</p>
+
+<p>We don't have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
+
+<p>```json
+{
+  "manage": {</p>
+
+<pre><code>"User": true,
+"Post": false,
+...
+</code></pre>
+
+<p>  },
+  "read": {</p>
+
+<pre><code>"User": true,
+"Post": true
+...
+</code></pre>
+
+<p>  },
+  "Update": {</p>
+
+<pre><code>"User": true,
+"Post": false
+</code></pre>
+
+<p>  }
+  ...
+}
+```</p>
+
+<p>In the view, we can choose to show/hide elements based on the user's role again.</p>
+
+<p><code>html
+  &lt;button ng-show="canManage('User')"&gt;
+</code></p>
+
+<p>```javascript
+  function FooCtrl () {</p>
+
+<pre><code>scope.canManage = function (model) {
+  scope.manage[model]
+};
+</code></pre>
+
+<p>  }
+```</p>
+]]></content>
+  </entry>
+  
+</feed>
