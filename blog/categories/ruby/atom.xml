@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Just A Startup Guy]]></title>
   <link href="http://ericzou.github.io/blog/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://ericzou.github.io/blog/"/>
-  <updated>2013-05-18T21:37:50-07:00</updated>
+  <updated>2013-05-20T22:38:16-07:00</updated>
   <id>http://ericzou.github.io/blog/</id>
   <author>
     <name><![CDATA[Eric Zou]]></name>
@@ -27,8 +27,6 @@
 <p>Our views were written in haml and generated from the server side. I liked it and would like to continue using it for generating view markup. Unfortunatelly, we didn't find a javascript library that work <em>exact</em> the same as ruby's haml.</p>
 
 <p>We ended up created a <code>TemplatesController</code> and route all of the template fetching requests though this <code>TemplatesController</code>. From browser's perspective, we are still serving static HTML, but we were able to write it in HAML from the server side.</p>
-
-<p>We’d like to use Angular templates but this meant we needed to rewrite a large chunk of views in static html and lose access to our layout system, view utility helpers and i18n translations.</p>
 
 <p>```ruby</p>
 
@@ -97,7 +95,7 @@ function FooCtrl ($scope) {
 
 <p>```</p>
 
-<p>Every time the user clicks submit without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular's two-way binding. The view then gets updated automatically.</p>
+<p>Every time the user clicks submit, without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular's two-way binding. The view then gets updated automatically.</p>
 
 <p>Note: The approach works for us becuase our application only validates the input after the user attempts to submit the form. It might not work well in your case.</p>
 
@@ -113,7 +111,7 @@ function FooCtrl ($scope) {
 
 <p>```</p>
 
-<p>We don't have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
+<p>Since we are switching to client side templates, we don't have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
 
 <p>```json
 {

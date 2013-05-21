@@ -31,6 +31,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3633431-16']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -103,8 +115,6 @@
 <p>Our views were written in haml and generated from the server side. I liked it and would like to continue using it for generating view markup. Unfortunatelly, we didn&#8217;t find a javascript library that work <em>exact</em> the same as ruby&#8217;s haml.</p>
 
 <p>We ended up created a <code>TemplatesController</code> and route all of the template fetching requests though this <code>TemplatesController</code>. From browser&#8217;s perspective, we are still serving static HTML, but we were able to write it in HAML from the server side.</p>
-
-<p>We’d like to use Angular templates but this meant we needed to rewrite a large chunk of views in static html and lose access to our layout system, view utility helpers and i18n translations.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -184,7 +194,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Every time the user clicks submit without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular&#8217;s two-way binding. The view then gets updated automatically.</p>
+<p>Every time the user clicks submit, without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular&#8217;s two-way binding. The view then gets updated automatically.</p>
 
 <p>Note: The approach works for us becuase our application only validates the input after the user attempts to submit the form. It might not work well in your case.</p>
 
@@ -199,7 +209,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>We don&#8217;t have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
+<p>Since we are switching to client side templates, we don&#8217;t have direct access to <code>ability</code> object anymore, but we can turn the CanCan ability into a service call. A get request to <code>/abilities.json</code> will return something like this for the current user:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
