@@ -16,8 +16,6 @@ Our views were written in haml and generated from the server side. I liked it an
 
 We ended up created a `TemplatesController` and route all of the template fetching requests though this `TemplatesController`. From browser's perspective, we are still serving static HTML, but we were able to write it in HAML from the server side.
 
-We’d like to use Angular templates but this meant we needed to rewrite a large chunk of views in static html and lose access to our layout system, view utility helpers and i18n translations.
-
 ```ruby
 # TemplatesController
 class TemplatesController
@@ -68,7 +66,7 @@ function FooCtrl ($scope) {
 
 ```
 
-Every time the user clicks submit without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular's two-way binding. The view then gets updated automatically.
+Every time the user clicks submit, without any client-side validation, the form issues an ajax request. We rely on ActiveRecord to do the validation, feed us with the correct error messages, and store the errors in an errors object in javascript, with Angular's two-way binding. The view then gets updated automatically.
 
 
 Note: The approach works for us becuase our application only validates the input after the user attempts to submit the form. It might not work well in your case.
@@ -82,7 +80,7 @@ We use CanCan for access control. In the view, we show and hide certain elements
     <button>Edit</button>
 ```
 
-We don't have direct access to `ability` object anymore, but we can turn the CanCan ability into a service call. A get request to `/abilities.json` will return something like this for the current user:
+Since we are switching to client side templates, we don't have direct access to `ability` object anymore, but we can turn the CanCan ability into a service call. A get request to `/abilities.json` will return something like this for the current user:
 
 ```json
 {
