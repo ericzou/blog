@@ -4,7 +4,7 @@
   <title><![CDATA[Category: AngularJS | Just A Startup Guy]]></title>
   <link href="http://ericzou.github.io/blog/blog/categories/angularjs/atom.xml" rel="self"/>
   <link href="http://ericzou.github.io/blog/"/>
-  <updated>2013-05-20T22:38:16-07:00</updated>
+  <updated>2013-05-28T23:58:47-07:00</updated>
   <id>http://ericzou.github.io/blog/</id>
   <author>
     <name><![CDATA[Eric Zou]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Using AngularJS for existing Rails app]]></title>
-    <link href="http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app/"/>
+    <link href="http://ericzou.github.io/blog/2013/05/03/using-angularjs-for-existing-rails-app/"/>
     <updated>2013-05-03T21:05:00-07:00</updated>
-    <id>http://ericzou.github.io/blog/blog/2013/05/03/retro-fitting-angularjs-for-existing-rails-app</id>
+    <id>http://ericzou.github.io/blog/2013/05/03/using-angularjs-for-existing-rails-app</id>
     <content type="html"><![CDATA[<p>In one of my projects, we were tasked to put AngularJS on top of an existing Rails app.  We wanted to keep the business impact at a minimum.  This means that we had to gradually make the transition while adding more end-user features.</p>
 
 <p>Since retro fitting a client side framework is pretty common for many Rails apps, I'm going to share some of the problems I've encoutered, and possible approaches I used.</p>
