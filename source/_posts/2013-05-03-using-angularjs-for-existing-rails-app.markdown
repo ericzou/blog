@@ -3,6 +3,8 @@ layout: post
 title: "Using AngularJS for existing Rails app"
 date: 2013-05-03 21:05
 comments: true
+keywords: AngularJS, Rails, Ruby
+description: How to using AngularJS for existing Rails app
 categories: [AngularJS, Rails, Ruby]
 ---
 
