@@ -1,32 +1,33 @@
 ---
 layout: post
-title: "Wake up and smell the tests"
+title: "Wake up and smell the (slow) tests"
 date: 2013-06-19 09:01
 comments: true
 categories:
 ---
 
-I've been on many projects where writing/runing tests were painfully slow. To test one line of change often requires us to construct a bunch unrelated models, fix a few failures in other tests and patiently wait an hour or two for the tests suit to pass locally and on ci.
+I've been on many projects where writing/runing tests were painfully slow. To test one line of change often requires me to construct a bunch unrelated models, fix a few failures in other tests and patiently wait an hour or two for the tests suite to pass locally and on ci.
 
 Worse, Developers often proud themselves for writing tests first, and have an excellent test coverage. These painfully slow processes for writing/running tests are often accepted as the cost of doing TDD.
 
-It is not. If the test is painful to write and slow to run. Chances are, my code can be structured better. When my tests smells, they are trying to tell me something.
+It is not. If the test is painful to write and slow to run. It's a smell that our code/test can be structured better. Rather than blindly writing more tests, I usually ask myself the following questions.
 
-Here are some of the smells I always keep an eye on.
 
-### Tests run slow
-This usually is the most important indicator to alert me something is wrong. When I have slow running tests, I think about the following:
+### Do my tests have too many inter-process communications?
+Inter-process communications are an order of magnitutue slower than in-memory communications. Mock out the interfaces if that's the case. Better yet, try design a system where these external connections are explicitly inversely injected. Then during the test, I just need to swap in a fake connection.
 
-* Do my tests have too many inter-process communications? Inter-process communications are an order of magnitutue slower than in-memory communications. Mock out the interfaces if that's the case.
+### Am I testing at the right level?
+Intergration tests are a necessary evil but need to be treated with caution.Writing an intergration test for an if statement change in the model can often be inapproproate. This is trading productivity for a false sense of security. Unfortunately, integration tests, once in place, are very difficult to remove since emotionally they provide a false sense of security that many developers relies on. So it's important to be very causious about them from the very beginning
 
-* Am I testing at the right level? Writing a intergration test for an if statement change in the model can often be inapproproate. I know lots of developers do this, IMHO, This is trading productivity for a false sense of security.
-
-* Is my test setup complicated? That's usually a sure sign the models are too coupled together. Rails developers has a tendency doing that. If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
+### Is my test setup complicated?
+That's usually a sure sign the models are too coupled together. Rails developers has a tendency doing that. If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
 
 * Can I modulize part of the project? Modulized code base usually has a decoupled code structure, which leads to simplier test setup, smaller test suites, and faster test runs.
 
 * Does my test code look boring or repetitive? Ok, this one might not contribute to the slowness of the tests, but its a smell usually related to my implementation.
 
+### Is my tests too 'meta'
+Writing tests that generates test can b. I use to do that a lot thought they were clever.
 * Tests code looks boring and repetitive
 * Tests are difficult to write
 
