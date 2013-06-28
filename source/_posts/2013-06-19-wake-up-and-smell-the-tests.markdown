@@ -20,16 +20,27 @@ Inter-process communications are an order of magnitutue slower than in-memory co
 Intergration tests are a necessary evil but need to be treated with caution.Writing an intergration test for an if statement change in the model can often be inapproproate. This is trading productivity for a false sense of security. Unfortunately, integration tests, once in place, are very difficult to remove since emotionally they provide a false sense of security that many developers relies on. So it's important to be very causious about them from the very beginning
 
 ### Is my test setup complicated?
-That's usually a sure sign the models are too coupled together. Rails developers has a tendency doing that. If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
+If I have to create lots of objects to just able to that's usually a sign the models are too coupled together. I've seen this happen a lot in Rails projects, since the framework itself does very little to prevent this.  If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
 
-* Can I modulize part of the project? Modulized code base usually has a decoupled code structure, which leads to simplier test setup, smaller test suites, and faster test runs.
+### Can I modulize part of the project?
+Modulized code base usually has a decoupled code structure, which leads to a simplier test setup, smaller test suites, and faster test runs.
+
+### Is my tests too 'meta'
+Writing tests that generates more tests seems clever. But it sufer from a number of problems:
+* Easily go overboard with it: In one of my projects, we went 'meta' for generating access control tests: that is a test for every role(guess, user, admin, etc), and every path to combination to make sure current user can/cannot access certain pages. That alone generated thousands of tests.
+
+* Lot of valueless tests: When you have tests like that, you are testing every possible values. When we really care only the common and edge cases.
+
+* Abstract: The intent of the each tests should be very clear and easy to read, but that's not usually the case when tests are 'meta'
+* Hard to debug: It's often hard to run a single test without running the whole
+
+
+* Tests code looks boring and repetitive
+* Tests are difficult to write
+
 
 * Does my test code look boring or repetitive? Ok, this one might not contribute to the slowness of the tests, but its a smell usually related to my implementation.
 
-### Is my tests too 'meta'
-Writing tests that generates test can b. I use to do that a lot thought they were clever.
-* Tests code looks boring and repetitive
-* Tests are difficult to write
 
 
 # Smell 1: Your tests run slow
