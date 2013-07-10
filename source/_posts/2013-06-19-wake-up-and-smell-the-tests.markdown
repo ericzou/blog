@@ -17,74 +17,26 @@ It is not. If the test is painful to write and slow to run. It's a smell that ou
 Inter-process communications are an order of magnitutue slower than in-memory communications. Mock out the interfaces if that's the case. Better yet, try design a system where these external connections are explicitly inversely injected. Then during the test, I just need to swap in a fake connection.
 
 ### Am I testing at the right level?
-Intergration tests are a necessary evil but need to be treated with caution.Writing an intergration test for an if statement change in the model can often be inapproproate. This is trading productivity for a false sense of security. Unfortunately, integration tests, once in place, are very difficult to remove since emotionally they provide a false sense of security that many developers relies on. So it's important to be very causious about them from the very beginning
+Intergration tests are a necessary evil and need to be treated as such. Writing an intergration test for an if statement change in the model can often be inapproproate. Unfortunately, integration tests, once in place provides a false sense of security and are usually difficult to remove. So it's important to be very causious about them from the very beginning.
 
 ### Is my test setup complicated?
-If I have to create lots of objects to just able to that's usually a sign the models are too coupled together. I've seen this happen a lot in Rails projects, since the framework itself does very little to prevent this.  If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
+If I have to create lots of objects to able to test my object. That's usually a sign the objects are too coupled together. I've seen this happen a lot in Rails projects, since the framework itself does very little to prevent this.  If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.
 
 ### Can I modulize part of the project?
-Modulized code base usually has a decoupled code structure, which leads to a simplier test setup, smaller test suites, and faster test runs.
+Modulized code base means a decoupled structure, which leads to a simplier test setup, smaller test suites, and faster test runs.
 
 ### Is my tests too 'meta'
 Writing tests that generates more tests seems clever. But it sufer from a number of problems:
-* Easily go overboard with it: In one of my projects, we went 'meta' for generating access control tests: that is a test for every role(guess, user, admin, etc), and every path to combination to make sure current user can/cannot access certain pages. That alone generated thousands of tests.
+* Easily go overboard with it: In one of my projects, we went 'meta' for generating access control tests - a test for every role(guess, user, admin, etc), and every path to combination to make sure current user can/cannot access certain pages. That alone generated thousands of tests and took a long time to run.
 
-* Lot of valueless tests: When you have tests like that, you are testing every possible values. When we really care only the common and edge cases.
+* Lot of valueless tests: When we have tests like these, we are often testing every possible scenario. When we really care only the common cases and edge cases.
+* Too abstract: The intent of the each tests should be very clear and easy to read, but that's usually not the case when tests are 'meta'
+* Hard to debug: It's often hard to run a single generated test without running the entire thing, and the line numbers are usually wrong.
 
-* Abstract: The intent of the each tests should be very clear and easy to read, but that's not usually the case when tests are 'meta'
-* Hard to debug: It's often hard to run a single test without running the whole
+### Does my test code look boring or repetitive?
+Tests should be interesting to write. If they look repetitive, that usually signals the userage of the code will have a common pattern with slight variarations. I would reconsider see if I can abstract the common pattern out into a behavior and a separate test for for that behavior.
 
-
-* Tests code looks boring and repetitive
-* Tests are difficult to write
-
-
-* Does my test code look boring or repetitive? Ok, this one might not contribute to the slowness of the tests, but its a smell usually related to my implementation.
+## Final Thought
+Many of us have grown custom to these slow and painful tests. Many of us have followed the TDD without really understand its spirit.  Maybe its time to wake up and smell the tests, they are trying to tell you something.
 
 
-
-# Smell 1: Your tests run slow
-This usually is the most important indicator to watch out for. Almost always, slow tests tells you something is wrong in your code - maybe your test code is too repetitive, maybe your are constructing too many objects in tests. If leave untreated, the slow tests will kill you productivity and destroy the benefit of TDD.
-
-## Your tests code looks repetitive.
-That usually is a sign that some of the funcationality can be extracted out into modules, and you should really test these individual modules rather than the objects that use these modules. Sometimes, we generate tests to handle repetitive testing, something like this:
-
-```ruby
-[ChildClass1, ChildClass2].each do |subject|
-
-  describe "#{subject}" do
-    it "should do something here" do
-      # expects...
-    end
-  end
-
-end
-```
-
-Generated tests usually does more bad than good. Because they are hard to debug(the line numbers are usually wrong), hard to run individually, and mask the real problem - your code needs to be more moduluar and these modules themselves need to be testable.
-
-
-## You have to construct a bunch unrelated modules in order to test your code
-That's a sign your models are too coupled with others. This is a common sin for ActiveRecord. Imaging the following code:
-
-```ruby
-  class User < ActiveRecord
-
-    # contrived example: get the tasks assigned to a specific role that the user belongs to
-    def tasks
-      user.roles.first.assignments.first.task
-    end
-
-  end
-```
-
-In order to test this, you will need to construct the User, a few Roles, a few Assignments, and a Task. Yuk. To make the matter worse, these dependencies are introduced arbitrarly, made it very hard to change the code.
-
-This is one of the main reason people are calling out for places otherside of ActiveRecord to handle business heavy logics.
-
-
-```ruby
-  class TaskManager
-    def
-  end
-You can usually cure this by explicitly declare dependencies, and inject them into your model(Dependency Injection).
