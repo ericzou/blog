@@ -3,7 +3,7 @@ layout: post
 title: "Wake up and smell the (slow) tests"
 date: 2013-06-19 09:01
 comments: true
-categories:
+categories: [Testing, Rails]
 ---
 
 I've been on many projects where writing/running tests were painfully slow.  To test one line of change often requires me to construct a bunch of unrelated models, fix a few failures in other tests and then patiently wait an hour or two for the tests suite to pass locally and on CI.
@@ -43,5 +43,3 @@ It's often hard to run a single generated test without running the entire thing 
 ### Does my test code look boring or repetitive?
 Tests should be interesting to write.  If they look repetitive, that usually signals repeated usage of code or code that have a common pattern with slight variations.  If this occurs, I would review and try to see if I can extract the common pattern out into a behavior and create a separate test just for that behavior.
 
-## Final Thoughts
-Many of us have grown accustomed to these slow and painful tests.  Many of us have also followed the TDD without really understanding it.  Perhaps it's time for us to wake up and smell the tests as it's really trying to tell us something.
