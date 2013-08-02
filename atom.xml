@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Just A Startup Guy]]></title>
-  <link href="http://ericzou.github.io/blog/atom.xml" rel="self"/>
-  <link href="http://ericzou.github.io/blog/"/>
-  <updated>2013-08-01T17:44:50-07:00</updated>
-  <id>http://ericzou.github.io/blog/</id>
+  <link href="http://blog.ericzou.com/atom.xml" rel="self"/>
+  <link href="http://blog.ericzou.com/"/>
+  <updated>2013-08-01T18:02:16-07:00</updated>
+  <id>http://blog.ericzou.com/</id>
   <author>
     <name><![CDATA[Eric Zou]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Wake up and smell the (slow) tests]]></title>
-    <link href="http://ericzou.github.io/blog/2013/06/19/wake-up-and-smell-the-tests/"/>
+    <link href="http://blog.ericzou.com/2013/06/19/wake-up-and-smell-the-tests/"/>
     <updated>2013-06-19T09:01:00-07:00</updated>
-    <id>http://ericzou.github.io/blog/2013/06/19/wake-up-and-smell-the-tests</id>
+    <id>http://blog.ericzou.com/2013/06/19/wake-up-and-smell-the-tests</id>
     <content type="html"><![CDATA[<p>I&#8217;ve been on many projects where writing/running tests were painfully slow.  To test one line of change often requires me to construct a bunch of unrelated models, fix a few failures in other tests and then patiently wait an hour or two for the tests suite to pass locally and on CI.</p>
 
 <p>Even worse, the developers are often proud of themselves for writing the tests first to have an excellent test coverage.  These painfully slow processes for writing/running tests are often accepted as the cost of doing TDD.</p>
@@ -65,9 +65,9 @@ It&#8217;s often hard to run a single generated test without running the entire 
   
   <entry>
     <title type="html"><![CDATA[Using AngularJS for existing Rails app]]></title>
-    <link href="http://ericzou.github.io/blog/2013/05/03/using-angularjs-for-existing-rails-app/"/>
+    <link href="http://blog.ericzou.com/2013/05/03/using-angularjs-for-existing-rails-app/"/>
     <updated>2013-05-03T21:05:00-07:00</updated>
-    <id>http://ericzou.github.io/blog/2013/05/03/using-angularjs-for-existing-rails-app</id>
+    <id>http://blog.ericzou.com/2013/05/03/using-angularjs-for-existing-rails-app</id>
     <content type="html"><![CDATA[<p>In one of my projects, we were tasked to put AngularJS on top of an existing Rails app.  We wanted to keep the business impact at a minimum.  This means that we had to gradually make the transition while adding more end-user features.</p>
 
 <p>Since retro fitting a client side framework is pretty common for many Rails apps, I&#8217;m going to share some of the problems I&#8217;ve encoutered, and possible approaches I used.</p>
