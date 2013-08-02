@@ -9,7 +9,7 @@
   <meta name="author" content="Eric Zou">
 
   
-  <meta name="description" content="I&#8217;ve been on many projects where writing/runing tests were painfully slow. To test one line of change often requires me to construct a bunch &hellip;">
+  <meta name="description" content="I&#8217;ve been on many projects where writing/running tests were painfully slow. To test one line of change often requires me to construct a bunch &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -103,47 +103,48 @@
   </header>
 
 
-<div class="entry-content"><p>I&#8217;ve been on many projects where writing/runing tests were painfully slow. To test one line of change often requires me to construct a bunch unrelated models, fix a few failures in other tests and patiently wait an hour or two for the tests suite to pass locally and on ci.</p>
+<div class="entry-content"><p>I&#8217;ve been on many projects where writing/running tests were painfully slow.  To test one line of change often requires me to construct a bunch of unrelated models, fix a few failures in other tests and then patiently wait an hour or two for the tests suite to pass locally and on CI.</p>
 
-<p>Worse, Developers often proud themselves for writing tests first, and have an excellent test coverage. These painfully slow processes for writing/running tests are often accepted as the cost of doing TDD.</p>
+<p>Even worse, the developers are often proud of themselves for writing the tests first to have an excellent test coverage.  These painfully slow processes for writing/running tests are often accepted as the cost of doing TDD.</p>
 
-<p>It is not. If the test is painful to write and slow to run. It&#8217;s a smell that our code/test can be structured better. Rather than blindly writing more tests, I usually ask myself the following questions.</p>
+<p>It is not. These painfully slow tests are a clear hint that the code/test can be structured better.  Rather than blindly writing more tests, I usually ask myself the following questions.</p>
 
 <h3>Do my tests have too many inter-process communications?</h3>
 
-<p>Inter-process communications are an order of magnitutue slower than in-memory communications. Mock out the interfaces if that&#8217;s the case. Better yet, try design a system where these external connections are explicitly inversely injected. Then during the test, I just need to swap in a fake connection.</p>
+<p>Inter-process communications are an order of magnitutue slower than in-memory communications.  Mock out the interfaces if that&#8217;s the case.  Better yet, try to design a system where these external connections are explicitly inversely injected.  Then during the test all is needed is just to swap in a fake connection.</p>
 
 <h3>Am I testing at the right level?</h3>
 
-<p>Intergration tests are a necessary evil and need to be treated as such. Writing an intergration test for an if statement change in the model can often be inapproproate. Unfortunately, integration tests, once in place provides a false sense of security and are usually difficult to remove. So it&#8217;s important to be very causious about them from the very beginning.</p>
+<p>Integration tests are a necessary evil and need to be treated as such.  Writing an integration test for an &#8216;if&#8217; statement change in the model can often be inappropriate.  Unfortunately, many developers thinks
+the more the better when writing integration tests, which often leads to a bloated test suite.</p>
 
 <h3>Is my test setup complicated?</h3>
 
-<p>If I have to create lots of objects to able to test my object. That&#8217;s usually a sign the objects are too coupled together. I&#8217;ve seen this happen a lot in Rails projects, since the framework itself does very little to prevent this.  If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.</p>
+<p>If I have to create lots of objects to be able to test my object then that&#8217;s usually a sign the objects are too coupled together.  I&#8217;ve seen this happen to a lot in Rails projects since the framework itself does very little to prevent this.  If I spend more time setting up the tests than actually writing it, I would investigate it a bit to see if I can decouple the code dependencies.</p>
 
 <h3>Can I modulize part of the project?</h3>
 
 <p>Modulized code base means a decoupled structure, which leads to a simplier test setup, smaller test suites, and faster test runs.</p>
 
-<h3>Is my tests too &#8216;meta&#8217;</h3>
+<h3>Are my tests too &#8216;meta&#8217;</h3>
 
-<p>Writing tests that generates more tests seems clever. But it sufer from a number of problems:
-* Easily go overboard with it: In one of my projects, we went &#8216;meta&#8217; for generating access control tests - a test for every role(guess, user, admin, etc), and every path to combination to make sure current user can/cannot access certain pages. That alone generated thousands of tests and took a long time to run.</p>
+<p>Writing tests that generates more tests seems clever but there actually lots of problems:</p>
 
 <ul>
-<li>Lot of valueless tests: When we have tests like these, we are often testing every possible scenario. When we really care only the common cases and edge cases.</li>
-<li>Too abstract: The intent of the each tests should be very clear and easy to read, but that&#8217;s usually not the case when tests are &#8216;meta&#8217;</li>
-<li>Hard to debug: It&#8217;s often hard to run a single generated test without running the entire thing, and the line numbers are usually wrong.</li>
+<li><p>Very easy to go overboard with it:
+In one of my projects, we went &#8216;meta&#8217; for generating access control tests - a test for every role (guest, user, admin, etc), and every path combination to make sure current users can/cannot access certain pages. That alone, generated thousands of tests and took a very long time to run.</p></li>
+<li><p>Lots of valueless tests:
+With tests like these, we often try to test every possible scenario. but when we really only care about the common cases and edge cases.</p></li>
+<li><p>Too abstract:
+The intent of each test should be very clear and easy to read but that&#8217;s usually not the case when tests are &#8216;meta&#8217;.</p></li>
+<li><p>Hard to debug:
+It&#8217;s often hard to run a single generated test without running the entire thing and the line numbers are usually wrong.</p></li>
 </ul>
 
 
 <h3>Does my test code look boring or repetitive?</h3>
 
-<p>Tests should be interesting to write. If they look repetitive, that usually signals the userage of the code will have a common pattern with slight variarations. I would reconsider see if I can abstract the common pattern out into a behavior and a separate test for for that behavior.</p>
-
-<h2>Final Thought</h2>
-
-<p>Many of us have grown custom to these slow and painful tests. Many of us have followed the TDD without really understand its spirit.  Maybe its time to wake up and smell the tests, they are trying to tell you something.</p>
+<p>Tests should be interesting to write.  If they look repetitive, that usually signals repeated usage of code or code that have a common pattern with slight variations.  If this occurs, I would review and try to see if I can extract the common pattern out into a behavior and create a separate test just for that behavior.</p>
 </div>
 
 
@@ -168,6 +169,12 @@
 
 <time datetime="2013-06-19T09:01:00-07:00" pubdate data-updated="true">Jun 19<span>th</span>, 2013</time>
       
+
+<span class="categories">
+  
+    <a class='category' href='/blog/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/blog/categories/testing/'>Testing</a>
+  
+</span>
 
 
     </p>
